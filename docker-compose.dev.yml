@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  django:
+    container_name: django
+    build: ./src
+    command: python3 manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+    links:
+      - db:db
+    networks:
+      - backend
+    depends_on:
+      - db
+    volumes:
+      - ./src:/usr/src/app
+      - static_volume:/usr/src/backend/django_static
+    
+  db:
+    container_name: db
+    image: postgres
+    ports:
+      - 5432:5432
+    networks:
+      - backend
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER : $SQL_USER
+      POSTGRES_PASSWORD : $SQL_PASSWORD
+      
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  static_volume:
+
+  

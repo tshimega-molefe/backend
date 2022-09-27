@@ -1,0 +1,13 @@
+# .circleci/config.yml
+version: 2
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Create .env file
+          command: touch .env
+      - run:
+          name: Build Containers
+          command: docker compose -f docker-compose.prod.yml

@@ -13,7 +13,7 @@ RUN pip install --upgrade pip
 
 #need to install these for dependencies
 RUN apt-get update && apt-get -y install libpq-dev gcc
-
+RUN apt-get install -y build-essential libssl-dev libffi-dev
 
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
