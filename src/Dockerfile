@@ -14,6 +14,9 @@ RUN pip install --upgrade pip
 #need to install these for dependencies
 RUN apt-get update && apt-get -y install libpq-dev gcc
 RUN apt-get install -y build-essential libssl-dev libffi-dev
+RUN apt-get install -y gdal-bin libgdal-dev
+RUN apt-get install -y python3-gdal
+RUN apt-get install -y binutils libproj-dev
 
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
