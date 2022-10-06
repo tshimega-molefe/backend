@@ -30,20 +30,23 @@ class User(AbstractUser, PermissionsMixin):
         CITIZEN = 0, "CITIZEN"
         SECURITY = 1, "SECURITY"
 
+        def get_role(self):
+            return f'{self.get_role_display()}'
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     role = models.SmallIntegerField(choices=Roles.choices, default=0)
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255, blank=True, null=True)
+    last_name = models.CharField(max_length=255, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
-    created = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    modified = models.DateTimeField(auto_now=True, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    modified = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.username} - {self.first_name} {self.last_name}'
+        return f'{self.username}'
 
     def user_role(self):
         return f'{self.role.description}'
@@ -58,7 +61,7 @@ class Citizen(models.Model):
     image = models.CharField(max_length=256, blank=True)
 
     def __str__(self):
-        return self.user.first_name
+        return f'{self.user.username}'
 
 class Security(models.Model): 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -71,4 +74,4 @@ class Security(models.Model):
     rating = models.SmallIntegerField(blank=True, null=True)
 
     def __str__(self):
-        return self.user.first_name
+        return f'{self.user.username}'

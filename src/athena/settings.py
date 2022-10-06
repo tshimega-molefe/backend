@@ -39,8 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'rest_framework',
+    'channels',
     'user', 
-    'channels'
+    'emergency'
+    
 ]
 
 AUTH_USER_MODEL = "user.User"
