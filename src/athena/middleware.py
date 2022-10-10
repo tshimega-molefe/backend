@@ -26,7 +26,7 @@ def get_user(validated_token):
 
 class TokenAuthMiddleware(BaseMiddleware):
     """
-    Token authorization middleware for Django Channels 2 
+    Token authorization middleware for Django Channels
     """
 
     def __init__(self, inner):

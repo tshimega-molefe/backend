@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status, generics, viewsets
 from user.models import Citizen, Security, User
-from user.serializers import RegisterCitizenSerializer, RegisterSecuritySerializer, UpdateSecuritySerializer, UserSerializer, UpdateCitizenSerializer
+from user.serializers import CitizenSerializer, RegisterCitizenSerializer, RegisterSecuritySerializer, UpdateSecuritySerializer, UserSerializer, UpdateCitizenSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RegisterCitizenView(generics.GenericAPIView):
@@ -14,13 +14,15 @@ class RegisterCitizenView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        refresh = RefreshToken.for_user(user)
-
+        refresh = RefreshToken.for_user(user)        
+        
         return Response(status=status.HTTP_201_CREATED, data=
             {
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'refresh_expiry': int(refresh.lifetime.total_seconds()),
+                'access_expiry': int(refresh.access_token.lifetime.total_seconds())
+                
             }
         )
 
@@ -35,9 +37,10 @@ class RegisterSecurityView(generics.GenericAPIView):
 
         return Response(status=status.HTTP_201_CREATED, data=
             {
-                "user": UserSerializer(user, context=self.get_serializer_context()).data,
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
+                'refresh_expiry': int(refresh.lifetime.total_seconds()),
+                'access_expiry': int(refresh.access_token.lifetime.total_seconds())
             }
         )
 
@@ -63,10 +66,14 @@ class UpdateSecurityView(generics.UpdateAPIView):
 
 class ListUsersView(generics.ListAPIView): 
     queryset = User.objects.all()
- 
+
     permission_classes = [IsAuthenticated,]
     serializer_class = UserSerializer
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+class CitizenViewSet(viewsets.ModelViewSet):
+    serializer_class = CitizenSerializer
+    queryset = Citizen.objects.all()

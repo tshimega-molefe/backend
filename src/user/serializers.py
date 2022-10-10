@@ -58,5 +58,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'first_name', 'last_name', 'role')
-        
+        fields = ('username', 'first_name', 'last_name', 'role')
+
+class CitizenSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta: 
+        model = Citizen
+        fields = '__all__'
+
+class SecuritySerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta: 
+        model = Security
+        fields = '__all__'

@@ -12,7 +12,7 @@ import os
 from channels.routing import ProtocolTypeRouter, URLRouter
 from .middleware import TokenAuthMiddlewareStack
 from django.core.asgi import get_asgi_application
-from .routing import websocket_urlpatterns
+from emergency.routing import websocket_urlpatterns
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'athena.settings')
 
