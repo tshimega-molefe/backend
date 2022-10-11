@@ -29,20 +29,16 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
         
         return serializer.create(serializer.validated_data)
 
-    @database_sync_to_async
+    @sync_to_async
     def db_cancel_emergency(self, data):
-        instance = Emergency.objects.get(id=data['id'])
-        instance.status = Emergency.Status.CANCELLED
+        emergency = Emergency.objects.get(id=data['id'])
+        emergency.status = Emergency.Status.CANCELLED
         
-        serializer = EmergencySerializer(data=data, instance=instance)
+        serializer = EmergencySerializer(data=data, instance=emergency)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-        emergency = list(serializer.save())
-        citizen = emergency.citizen
-        security = emergency.security
-
-    
-        return {'emergency': emergency, 'citizen': citizen, 'security': security}
+        return serializer.data
     
     @database_sync_to_async
     def db_update_emergency(self, data):
@@ -85,8 +81,6 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
     async def create_emergency(self, message):        
         emergency = await self.db_create_emergency(message)
 
-
-
         await self.channel_layer.group_send('SECURITY',  
                 {
                     'type': 'echo.message',
@@ -99,14 +93,17 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
 
     async def cancel_emergency(self, message):        
         emergency_data = await self.db_cancel_emergency(message)
-    
-        await self.channel_layer.group_send(f'{emergency_data.get("emergency")}',  
+        print(emergency_data["id"])
+
+        await self.channel_layer.group_send(f'{emergency_data["id"]}',  
                 {
                     'type': 'echo.message',
-                    'id': f'{emergency_data.get("citizen")}',
+                    'status': f'cancelled',
                     'username': self.user.username,
                 }
         )
+
+        await self.channel_layer.group_discard(f'{emergency_data["id"]}', self.channel_name)
         
         
 
