@@ -93,7 +93,6 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
 
     async def cancel_emergency(self, message):        
         emergency_data = await self.db_cancel_emergency(message)
-        print(emergency_data["id"])
 
         await self.channel_layer.group_send(f'{emergency_data["id"]}',  
                 {
@@ -104,8 +103,6 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
         )
 
         await self.channel_layer.group_discard(f'{emergency_data["id"]}', self.channel_name)
-        
-        
 
     async def accept_emergency(self, message):        
         emergency = await self.db_accept_emergency(message)
@@ -147,13 +144,14 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
         if not self.user.is_authenticated:
             return await self.close()
 
-        await self.accept()
         if self.user.get_role_display() == "SECURITY":
             await self.channel_layer.group_add(f'{self.user.get_role_display()}', self.channel_name)
             
         elif self.user.get_role_display() == "CITIZEN":
             for emergency in await self.db_get_user_emergencys():
                 await self.channel_layer.group_add(emergency["id"], self.channel_name) 
+
+        await self.accept()
            
     async def disconnect(self, code):
         await super().disconnect(code=code)
