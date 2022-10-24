@@ -31,4 +31,5 @@ class EmergencyTrack(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.emergency} - {self.status}'
+        return f'{self.emergency} - {self.get_status_display()}'
+
