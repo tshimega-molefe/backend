@@ -1,5 +1,4 @@
 from channels.db import database_sync_to_async
-from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from emergency.decorators import role_required
 from emergency.models import Emergency
@@ -169,6 +168,12 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 
                 emergency = await self.db_cancel_emergency(id=content['id'])
 
+                await self.channel_layer.group_send(f"SECURITY",  
+                {
+                    'type': 'cancel.emergency',
+                    'id': f"{emergency.id}"
+                })
+
                 await self.channel_layer.group_send(f"{emergency.id}",  
                 {
                     'type': 'cancel.emergency',
@@ -216,8 +221,8 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 try:
                     # UntypedToken(token)                    
                     decoded_data = TokenBackend(algorithm="HS256").decode(token, verify=False)
-                    # userid = decoded_data['user_id']
                     self.scope['user'] = await self.get_user(validated_token=decoded_data)
+                    
                     await self.channel_layer.group_add(f"{self.scope['user'].id}", self.channel_name)
 
                     if self.scope['user'].get_role_display() == "SECURITY":
