@@ -33,6 +33,7 @@ class TokenAuthMiddleware(BaseMiddleware):
         self.inner = inner
 
     async def __call__(self, scope, receive, send):
+        
         headers = dict(scope['headers'])
         if b'authorization' in headers:
             try:
