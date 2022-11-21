@@ -148,18 +148,20 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 emergency = await self.db_create_emergency(user=self.scope['user'])
                 
                 await self.channel_layer.group_send(f"SECURITY",  
-                {
-                    'type': 'create.emergency',
-                    'id': f"{emergency}",
-                    'username': f"{self.scope['user']}"
-                })
+                    {
+                        'type': 'create.emergency',
+                        'id': f"{emergency}",
+                        'username': f"{self.scope['user']}"
+                    }
+                )
 
                 await self.channel_layer.group_send(f"{self.scope['user'].id}", 
-                {
-                    'type': 'create.emergency',
-                    'id': f"{emergency}",
-                    'username': f"{self.scope['user']}",
-                })
+                    {
+                        'type': 'create.emergency',
+                        'id': f"{emergency}",
+                        'username': f"{self.scope['user']}",
+                    }
+                )
                 
                 await self.channel_layer.group_add(f"{emergency.id}", self.channel_name)
 
@@ -169,16 +171,18 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 emergency = await self.db_cancel_emergency(id=content['id'])
 
                 await self.channel_layer.group_send(f"SECURITY",  
-                {
-                    'type': 'cancel.emergency',
-                    'id': f"{emergency.id}"
-                })
+                    {
+                        'type': 'cancel.emergency',
+                        'id': f"{emergency.id}"
+                    }
+                )
 
                 await self.channel_layer.group_send(f"{emergency.id}",  
-                {
-                    'type': 'cancel.emergency',
-                    'id': f"{emergency.id}"
-                })
+                    {
+                        'type': 'cancel.emergency',
+                        'id': f"{emergency.id}"
+                    }
+                )
 
                 await self.channel_layer.group_discard(f"{emergency.id}", self.channel_name)
 
@@ -189,11 +193,12 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 
                 await self.channel_layer.group_add(f'{emergency.id}', self.channel_name)
                 await self.channel_layer.group_send(f"{emergency.id}",
-                {
-                    'type': 'accept.emergency',
-                    'id': f"{content['id']}",
-                    'security': f"{self.scope['user']}"
-                })
+                    {
+                        'type': 'accept.emergency',
+                        'id': f"{content['id']}",
+                        'security': f"{self.scope['user']}"
+                    }
+                )
 
             #Emergency Start
             elif message_type == 'start.emergency':
@@ -208,10 +213,11 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
             elif message_type == 'complete.emergency':
                 emergency = await self.db_complete_emergency(id=content['id'])
                 await self.channel_layer.group_send(f'{emergency.id}',
-                {
-                    'type': 'complete.emergency',
-                    'id': f'{emergency.id}'
-                })
+                    {
+                        'type': 'complete.emergency',
+                        'id': f'{emergency.id}'
+                    }
+                )
 
         #If user isnt authorised make the user send authorisation details or disconnect the user
         else: 
@@ -222,7 +228,7 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                     # UntypedToken(token)                    
                     decoded_data = TokenBackend(algorithm="HS256").decode(token, verify=False)
                     self.scope['user'] = await self.get_user(validated_token=decoded_data)
-                    
+
                     await self.channel_layer.group_add(f"{self.scope['user'].id}", self.channel_name)
 
                     if self.scope['user'].get_role_display() == "SECURITY":
@@ -250,7 +256,5 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                 # Data is not valid, so close the connection.
                 print(e)
                 await self.close(code=4001)
-                
-                
 
         return await super().receive_json(content, **kwargs)
