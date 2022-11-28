@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -85,14 +86,15 @@ ASGI_APPLICATION = 'athena.asgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'password',
-        'HOST': 'db',
-        'PORT': '5432'
+        'ENGINE':  os.getenv("SQL_ENGINE", "django.db.backends.postgresql"),
+        'NAME': os.getenv("SQL_DATABASE", "postgres"),
+        'USER': os.getenv("SQL_USER", "postgres"),
+        'PASSWORD': os.getenv("SQL_PASSWORD"),
+        'HOST': os.getenv("SQL_HOST", "db"),
+        'PORT': os.getenv("SQL_PORT", "5432"), 
     }
 }
+
 
 
 # Password validation

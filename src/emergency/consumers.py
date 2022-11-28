@@ -49,7 +49,6 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
 
         return emergency
     
-
     @database_sync_to_async
     def db_accept_emergency(self, id, user):
         emergency = Emergency.objects.get(id=id)
