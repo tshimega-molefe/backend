@@ -21,6 +21,9 @@ class Emergency(models.Model):
     def __str__(self):
         return f'{self.id}'
 
+    def get_status(self):
+        return self.Status(self.status).label
+
     def get_absolute_url(self):
         return reverse('emergency:emergency_id', kwargs={'emergency_id': self.id})
 

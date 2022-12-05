@@ -24,16 +24,24 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def db_get_user_emergencys(self): 
         user_role = self.scope['user'].get_role_display()
-        excluded_statuses = [Emergency.Status.COMPLETED, Emergency.Status.CANCELLED]
-
-        if user_role == 'SECURITY':
-            emergency_ids = self.scope['user'].security.emergencys_as_security.exclude(status__in = excluded_statuses)
-        else: 
-            emergency_ids = self.scope['user'].citizen.emergencys_as_citizen.exclude(status__in = excluded_statuses)
+        included_statuses = [Emergency.Status.REQUESTED, Emergency.Status.ACCEPTED, Emergency.Status.IN_PROGRESS]
         
-        serializer = EmergencySerializer(emergency_ids, many=True)
-    
-        return serializer.data
+        if user_role == 'SECURITY':
+            emergencies_matched = Emergency.objects.filter(status__in=included_statuses, security=self.scope['user'].security)
+        else: 
+            emergencies_matched = Emergency.objects.filter(status__in=included_statuses, citizen=self.scope['user'].citizen)
+
+        emergencies = []
+        for emergency in emergencies_matched:
+            emergencies.append(emergency)
+
+        return emergencies
+
+    @database_sync_to_async
+    def db_get_emergency(self, id):
+        emergency = Emergency.objects.get(id=id)
+
+        return emergency
 
     @database_sync_to_async
     def db_create_emergency(self, user):
@@ -57,7 +65,6 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
         emergency.save()
 
         return emergency
-
 
     @database_sync_to_async
     def db_start_emergency(self, id):
@@ -84,7 +91,7 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
 
 
 
-
+    # TODO: Change username -> citizen
     async def create_emergency(self, message):   
         await self.send_json(
             {
@@ -108,9 +115,13 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
             {
                 'type': message['type'],
                 'id': message['id'],
-                'security': message['security']
+                # 'security': message['security']
             }
         )
+
+    async def update_emergency(self, message):   
+        await self.send_json(message)
+        
 
 
     async def start_emergency(self, message):        
@@ -127,6 +138,15 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
             {
                 'type': message['type'],
                 'id': message['id']
+            }
+        )
+
+    async def renew_emergency(self, message):
+        await self.send_json(
+            {
+                'type': message['type'],
+                'id': message['id'],
+                'status': message['status']
             }
         )
 
@@ -195,7 +215,7 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                     {
                         'type': 'accept.emergency',
                         'id': f"{content['id']}",
-                        'security': f"{self.scope['user']}"
+                        # 'security': f"{self.scope['user']}"
                     }
                 )
 
@@ -218,6 +238,29 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                     }
                 )
 
+            elif message_type == 'update.location':
+
+                # data = {
+                #     'type': 'update.location',
+                #     'id': f"{self.scope['user']}"
+                # }
+   
+                # await self.channel_layer.group_send(f"{self.scope['user'].id}", data)
+                
+                for emergency in await self.db_get_user_emergencys():
+                    data = {
+                        'type': 'update.emergency',
+                        'id': f'{emergency.id}',
+                    }
+
+                    if 'citizen' in content:
+                        data['citizen'] = content['citizen']
+                    
+                    if 'security' in content: 
+                        data['security'] = content['security']
+
+                    await self.channel_layer.group_send(f'{emergency.id}', data) 
+
         #If user isnt authorised make the user send authorisation details or disconnect the user
         else: 
             try: 
@@ -229,21 +272,17 @@ class EmergencyConsumer(AsyncJsonWebsocketConsumer):
                     self.scope['user'] = await self.get_user(validated_token=decoded_data)
 
                     await self.channel_layer.group_add(f"{self.scope['user'].id}", self.channel_name)
+                    await self.channel_layer.group_add(f"{self.scope['user'].get_role_display()}", self.channel_name)
 
-                    if self.scope['user'].get_role_display() == "SECURITY":
-                        await self.channel_layer.group_add(f"{self.scope['user'].get_role_display()}", self.channel_name)
-                        
-                    elif self.scope['user'].get_role_display() == "CITIZEN":
-                        for emergency in await self.db_get_user_emergencys():
-                            await self.channel_layer.group_add(emergency["id"], self.channel_name) 
+                    for emergency in await self.db_get_user_emergencys():
+                        await self.channel_layer.group_add(f'{emergency.id}', self.channel_name) 
 
-                        # await self.channel_layer.group_add("CITIZEN", self.channel_name)
-
-                        # await self.channel_layer.group_send(f'CITIZEN',
-                        # {
-                        #     'type': 'echo.message',
-                        #     'data': f'Hello World'
-                        # })
+                        await self.channel_layer.group_send(f'{emergency.id}', 
+                        {
+                            'type': 'renew.emergency',
+                            'id': f'{emergency.id}',
+                            'status': f'{emergency.get_status()}'
+                        })
 
                 except (InvalidToken, TokenError) as e:
                     # Token is invalid
