@@ -59,6 +59,7 @@ class Citizen(models.Model):
     contact_number = PhoneNumberField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
     image = models.CharField(max_length=256, blank=True)
+    friends = models.ManyToManyField('self', blank=True, null=True, symmetrical=False, related_name="friends_list")
 
     def __str__(self):
         return f'{self.user.username}'
@@ -75,3 +76,8 @@ class Security(models.Model):
 
     def __str__(self):
         return f'{self.user.username}'
+
+class FriendRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    from_user = models.ForeignKey(Citizen, related_name='from_user', on_delete=models.CASCADE)
+    to_user = models.ForeignKey(Citizen, related_name='to_user', on_delete=models.CASCADE)

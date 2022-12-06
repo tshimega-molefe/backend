@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Citizen, Security, User
+from .models import Citizen, Security, User, FriendRequest
 from django.db import transaction
 
 # Register serializer
@@ -73,3 +73,18 @@ class SecuritySerializer(serializers.ModelSerializer):
     class Meta: 
         model = Security
         fields = '__all__'
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    class Meta: 
+        model = FriendRequest
+        fields = '__all__'
+        optional_fields = ['to_user']
+        read_only_fields = ['from_user', 'id']
+
+    def create(self, validated_data):
+        '''Friend Request Send'''
+        friend_request = FriendRequest(from_user=self.context.get('sender'), **validated_data)
+        friend_request.save()
+
+        return friend_request
+
