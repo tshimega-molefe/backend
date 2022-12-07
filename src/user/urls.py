@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from user.views import CitizenViewSet, RegisterCitizenView, RegisterSecurityView, UpdateCitizenView, UpdateSecurityView, CreateFriendRequestView, AcceptFriendRequestView
+
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()

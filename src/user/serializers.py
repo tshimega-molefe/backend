@@ -6,7 +6,7 @@ from django.db import transaction
 class RegisterCitizenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id','username', 'email', 'password','first_name', 'last_name')
+        fields = ('id','username', 'email', 'password')
         required_fields = ('username', 'email', 'password')
         extra_kwargs = {
             'password':{'write_only': True},
@@ -20,7 +20,7 @@ class RegisterCitizenSerializer(serializers.ModelSerializer):
                                         role=User.Roles.CITIZEN)
 
         citizen = Citizen.objects.create(user=user)
-        return user
+        return user, citizen
 
 class UpdateCitizenSerializer(serializers.ModelSerializer):
     class Meta:
@@ -54,18 +54,30 @@ class UpdateSecuritySerializer(serializers.ModelSerializer):
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=User.Roles)
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name', 'role')
+        fields = ('username', 'first_name', 'last_name')
+
 
 class CitizenSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    friends = serializers.SerializerMethodField()
+
+    def get_friends(self, instance):
+
+        friends = instance.friends.all()
+        friend_list = []
+        for friend in friends:
+            friend_list.append({'username': friend.user.username, 'first_name': friend.user.first_name, 'lasts_name': friend.user.last_name})
+        
+        return friend_list
+
 
     class Meta: 
         model = Citizen
         fields = '__all__'
+
 
 class SecuritySerializer(serializers.ModelSerializer):
     user = UserSerializer()
@@ -87,4 +99,5 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         friend_request.save()
 
         return friend_request
+
 

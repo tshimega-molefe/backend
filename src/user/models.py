@@ -61,8 +61,12 @@ class Citizen(models.Model):
     image = models.CharField(max_length=256, blank=True)
     friends = models.ManyToManyField('self', blank=True, null=True, symmetrical=False, related_name="friends_list")
 
+    @classmethod
+    def get_friends(cls, instance):
+        return instance.friends_list.all()
+
     def __str__(self):
-        return f'{self.user.username}'
+        return f'{self.user.username} - {self.id}'
 
 class Security(models.Model): 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
