@@ -15,12 +15,10 @@ Citizen Views
 '''
 
 class IsSuperUser(BasePermission):
-
     def has_permission(self, request, view):
         return request.user and request.user.is_superuser
 
 class IsOwner(BasePermission):
-
     def has_object_permission(self, request, view, obj):
         citizen = User.objects.filter(pk=request.user.id).first().citizen
 
@@ -29,7 +27,6 @@ class IsOwner(BasePermission):
                 return True
             else:
                 return obj.id == citizen.id
-
         else:
             return False
 
@@ -160,7 +157,6 @@ class AcceptFriendRequestView(generics.GenericAPIView):
         friend_request_query = FriendRequest.objects.filter(pk=request.data.get('id')).first()
 
         if friend_request_query.to_user == citizen:
-
             friend_request_query.to_user.friends.add(friend_request_query.from_user)
             friend_request_query.from_user.friends.add(citizen)
 
