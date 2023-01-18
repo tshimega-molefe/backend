@@ -25,7 +25,7 @@ class RegisterCitizenSerializer(serializers.ModelSerializer):
 class UpdateCitizenSerializer(serializers.ModelSerializer):
     class Meta:
         model = Citizen
-        fields = ('sex', 'race', 'contact_number', 'birth_date', 'image', 'home_address')
+        fields = ('sex', 'race', 'contact_number', 'birth_date', 'profile_image', 'home_address')
 
 class RegisterSecuritySerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,7 +50,7 @@ class RegisterSecuritySerializer(serializers.ModelSerializer):
 class UpdateSecuritySerializer(serializers.ModelSerializer):
     class Meta:
         model = Security
-        fields = ('sex', 'race', 'contact_number', 'birth_date', 'image', 'company', 'rating')
+        fields = ('sex', 'race', 'contact_number', 'birth_date', 'profile_image', 'company', 'rating')
 
 # User serializer
 class UserSerializer(serializers.ModelSerializer):
@@ -72,7 +72,6 @@ class CitizenSerializer(serializers.ModelSerializer):
             friend_list.append({'username': friend.user.username, 'first_name': friend.user.first_name, 'lasts_name': friend.user.last_name})
         
         return friend_list
-
 
     class Meta: 
         model = Citizen

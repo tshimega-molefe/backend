@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib import admin
-from user.models import Citizen, Company, RaceChoiceField, Security, SexChoiceField, FriendRequest
-from user.models import User
+from user.models import Citizen, Company, RaceChoiceField, Security, SexChoiceField
+from user.models import User, FriendRequest
 
 # Register your models here.
 

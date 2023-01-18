@@ -58,7 +58,7 @@ class Citizen(models.Model):
     race = models.ForeignKey(RaceChoiceField, on_delete=models.PROTECT, blank=True, null=True)
     contact_number = PhoneNumberField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    image = models.CharField(max_length=256, blank=True)
+    profile_image = models.ImageField(upload_to='images', blank=True, null=True)
     friends = models.ManyToManyField('self', blank=True, null=True, symmetrical=False, related_name="friends_list")
 
     @classmethod
@@ -74,7 +74,7 @@ class Security(models.Model):
     race = models.ForeignKey(RaceChoiceField, on_delete=models.PROTECT, blank=True, null=True)
     contact_number = PhoneNumberField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
-    image = models.CharField(max_length=256, blank=True)
+    profile_image = models.ImageField(upload_to='images', blank=True, null=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, blank=True, null=True)
     rating = models.SmallIntegerField(blank=True, null=True)
 

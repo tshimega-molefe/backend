@@ -132,3 +132,6 @@ dmypy.json
 
 .DS_STORE
 docker
+
+#Docker volumes
+src/media/
