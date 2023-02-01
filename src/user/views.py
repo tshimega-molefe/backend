@@ -43,12 +43,11 @@ class RegisterCitizenView(generics.GenericAPIView):
 
         return Response(status=status.HTTP_201_CREATED, data=
             {
-                'id': citizen.id,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'refresh_expiry': int(refresh.lifetime.total_seconds()),
-                'access_expiry': int(refresh.access_token.lifetime.total_seconds())
                 
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                # 'refresh_expiry': int(refresh.lifetime.total_seconds()),
+                # 'access_expiry': int(refresh.access_token.lifetime.total_seconds())   
             }
         )
 
@@ -59,22 +58,47 @@ class UpdateCitizenView(generics.UpdateAPIView):
 
     def get_object(self):
         id = self.request.user.id
+
+        print(self.request.body)
+
         return Citizen.objects.get(user=id)
 
-class CitizenViewSet(viewsets.ModelViewSet):
+# class CitizenViewSet(viewsets.ModelViewSet):
+#     queryset = Citizen.objects.all()
+#     serializer_class = CitizenSerializer
+
+#     def get_permissions(self):
+#         # Overrides to tightest security: Only superuser can create, update, partial update, destroy, list
+#         self.permission_classes = [IsSuperUser, IsAuthenticated]
+
+#         # Allow only by explicit exception
+#         if self.action == 'retrieve':
+#             self.permission_classes = [IsOwner, IsAuthenticated]
+
+#         return super().get_permissions()
+
+
+class UserProfileView(generics.GenericAPIView):
     queryset = Citizen.objects.all()
     serializer_class = CitizenSerializer
+    permission_classes = [IsAuthenticated, IsOwner]
 
-    def get_permissions(self):
-        # Overrides to tightest security: Only superuser can create, update, partial update, destroy, list
-        self.permission_classes = [IsSuperUser, IsAuthenticated]
 
-        # Allow only by explicit exception
-        if self.action == 'retrieve':
-            self.permission_classes = [IsOwner, IsAuthenticated]
+    # def get_permissions(self):
+    #     # Overrides to tightest security: Only superuser can create, update, partial update, destroy, list
+    #     self.permission_classes = [IsSuperUser, IsAuthenticated, IsOwner]
+    #     # # Allow only by explicit exception
+    #     # if self.action == 'retrieve':
 
-        return super().get_permissions()
+    #     #     self.permission_classes = [IsOwner, IsAuthenticated]
 
+    #     return super().get_permissions()
+
+    def get(self, request, *args, **kwargs):
+        user = User.objects.filter(pk=request.user.id).first().citizen
+        serializer = self.serializer_class(user)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 '''
 Security Views

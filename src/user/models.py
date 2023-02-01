@@ -37,8 +37,6 @@ class User(AbstractUser, PermissionsMixin):
     username = models.CharField(max_length=255, unique=True)
     email = models.EmailField(max_length=255, unique=True)
     role = models.SmallIntegerField(choices=Roles.choices, default=0)
-    first_name = models.CharField(max_length=255, blank=True, null=True)
-    last_name = models.CharField(max_length=255, blank=True, null=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
@@ -53,6 +51,7 @@ class User(AbstractUser, PermissionsMixin):
 
 class Citizen(models.Model): 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=255, blank=True)
     home_address = models.CharField(max_length=256, blank=True, null=True)
     sex = models.ForeignKey(SexChoiceField, on_delete=models.PROTECT, blank=True, null=True)
     race = models.ForeignKey(RaceChoiceField, on_delete=models.PROTECT, blank=True, null=True)

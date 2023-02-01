@@ -1,13 +1,15 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from user.views import CitizenViewSet, RegisterCitizenView, RegisterSecurityView, UpdateCitizenView, UpdateSecurityView, CreateFriendRequestView, AcceptFriendRequestView
+from user.views import UserProfileView, RegisterCitizenView, RegisterSecurityView, UpdateCitizenView, UpdateSecurityView, CreateFriendRequestView, AcceptFriendRequestView
 
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'citizen', CitizenViewSet, basename='citizen')
+# router.register(r'citizen', CitizenViewSet, basename='citizen')
 
 urlpatterns = [
+    path('profile/', UserProfileView.as_view()),
+    
     path('citizen/register/', RegisterCitizenView.as_view()),
     path('security/register/', RegisterSecurityView.as_view()),
     path('login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

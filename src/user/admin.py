@@ -3,11 +3,8 @@ from django.contrib import admin
 from user.models import Citizen, Company, RaceChoiceField, Security, SexChoiceField
 from user.models import User, FriendRequest
 
-# Register your models here.
-
 class UserAdmin(admin.ModelAdmin):
     model = User
-
 
 class CitizenAdmin(admin.ModelAdmin):
     model = Citizen

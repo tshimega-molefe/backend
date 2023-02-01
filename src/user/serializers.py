@@ -2,35 +2,11 @@ from rest_framework import serializers
 from .models import Citizen, Security, User, FriendRequest
 from django.db import transaction
 
-# Register serializer
-class RegisterCitizenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id','username', 'email', 'password')
-        required_fields = ('username', 'email', 'password')
-        extra_kwargs = {
-            'password':{'write_only': True},
-        }
-    
-    @transaction.atomic
-    def create(self, validated_data):
-        user = User.objects.create_user(username=validated_data['username'],
-                                        email=validated_data['email'],
-                                        password = validated_data['password'],
-                                        role=User.Roles.CITIZEN)
-
-        citizen = Citizen.objects.create(user=user)
-        return user, citizen
-
-class UpdateCitizenSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Citizen
-        fields = ('sex', 'race', 'contact_number', 'birth_date', 'profile_image', 'home_address')
 
 class RegisterSecuritySerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id','username', 'email', 'password','first_name', 'last_name')
+        fields = ('id','username', 'email', 'password')
         required_fields = ('username', 'email', 'password')
         extra_kwargs = {
             'password':{'write_only': True},
@@ -57,12 +33,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'last_name')
-
+        fields = ('username', 'email')
 
 class CitizenSerializer(serializers.ModelSerializer):
     user = UserSerializer()
-    friends = serializers.SerializerMethodField()
+    # friends = serializers.SerializerMethodField()
 
     def get_friends(self, instance):
 
@@ -76,6 +51,33 @@ class CitizenSerializer(serializers.ModelSerializer):
     class Meta: 
         model = Citizen
         fields = '__all__'
+
+# Register serializer
+class RegisterCitizenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id','username', 'email', 'password')
+        required_fields = ('username', 'email', 'password')
+        extra_kwargs = {
+            'password':{'write_only': True},
+        }
+    
+    @transaction.atomic
+    def create(self, validated_data):
+        user = User.objects.create_user(username=validated_data['username'],
+                                        email=validated_data['email'],
+                                        password = validated_data['password'],
+                                        role=User.Roles.CITIZEN)
+
+        citizen = Citizen.objects.create(user=user)
+        return user, citizen
+
+class UpdateCitizenSerializer(serializers.ModelSerializer):    
+    user = UserSerializer()
+    class Meta:
+        model = Citizen
+        fields = ('id', 'sex', 'race', 'contact_number', 'birth_date', 'profile_image', 'home_address', 'full_name', 'user')
+        read_only_fields = ['user']
 
 
 class SecuritySerializer(serializers.ModelSerializer):
